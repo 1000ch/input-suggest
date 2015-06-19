@@ -96,8 +96,6 @@ var getCaretCoordinates = require("./../bower_components/textarea-caret-position
 
 var TextareaSuggestion = (function () {
   function TextareaSuggestion(textarea, suggestions) {
-    var _this = this;
-
     _classCallCheck(this, TextareaSuggestion);
 
     if (!textarea) {
@@ -112,7 +110,7 @@ var TextareaSuggestion = (function () {
     this.suggestions = [];
     this.textarea = textarea;
     this.textareaStyle = getComputedStyle(this.textarea);
-    this.textareaFontSize = this.textareaStyle['font-size'].replace('px', '') - 0;
+    this.textareaFontSize = this.textareaStyle['font-size'].replace(/(px)/, '') - 0;
     this.container = null;
     this.list = [];
 
@@ -121,78 +119,91 @@ var TextareaSuggestion = (function () {
     this.selectionStart = 0;
     this.selectionEnd = 0;
 
-    textarea.addEventListener('input', function (e) {
-      _this.selectionStart = e.target.selectionStart;
-      _this.selectionEnd = e.target.selectionEnd;
-      var inputText = _this.textarea.value.substring(_this.selectionEnd - 1, _this.selectionEnd);
-      if (_this.suggestions.every(function (suggestion) {
-        return suggestion.substring(0, 1) !== inputText;
-      })) {
-        _this.container.style.display = 'none';
-        return;
-      }
-      _this.showPopup();
-    });
+    textarea.addEventListener('input', this.onInput.bind(this));
 
-    textarea.addEventListener('keydown', function (e) {
-
-      switch (e.keyCode) {
-        case 13:
-          if (_this.container.style.display === 'block') {
-            e.preventDefault();
-            var suggestion = _this.suggestions[_this.selectedIndex];
-            _this.insertSuggestion(suggestion);
-            _this.hidePopup();
-          }
-          break;
-        case 38:
-          if (_this.selectedIndex > 0) {
-            _this.selectedIndex--;
-          }
-          break;
-        case 40:
-          if (_this.selectedIndex < _this.suggestions.length - 1) {
-            _this.selectedIndex++;
-          }
-          break;
-        default:
-          _this.hidePopup();
-          break;
-      }
-
-      if (_this.container.style.display === 'block') {
-        e.preventDefault();
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = _this.list[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var item = _step.value;
-
-            item.style.background = 'white';
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator['return']) {
-              _iterator['return']();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        _this.list[_this.selectedIndex].style.background = 'red';
-      }
-    });
+    textarea.addEventListener('keydown', this.onKeyDown.bind(this));
   }
 
   _createClass(TextareaSuggestion, [{
+    key: 'onInput',
+    value: function onInput(e) {
+      this.selectionStart = e.target.selectionStart;
+      this.selectionEnd = e.target.selectionEnd;
+      var inputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+      if (this.suggestions.every(function (suggestion) {
+        return suggestion.substring(0, 1) !== inputText;
+      })) {
+        this.container.style.display = 'none';
+        return;
+      }
+      this.showPopup();
+    }
+  }, {
+    key: 'onKeyDown',
+    value: function onKeyDown(e) {
+      switch (e.keyCode) {
+        case 13:
+          if (this.isSelected) {
+            e.preventDefault();
+            var suggestion = this.suggestions[this.selectedIndex];
+            this.insertSuggestion(suggestion);
+          }
+          this.hidePopup();
+          break;
+        case 38:
+          if (this.selectedIndex > 0) {
+            this.selectedIndex--;
+          }
+          if (this.isShown) {
+            e.preventDefault();
+            this.highlightSelectedIndex();
+          }
+          break;
+        case 40:
+          if (this.selectedIndex < this.suggestions.length - 1) {
+            this.selectedIndex++;
+          }
+          if (this.isShown) {
+            e.preventDefault();
+            this.highlightSelectedIndex();
+          }
+          break;
+        default:
+          this.hidePopup();
+          break;
+      }
+    }
+  }, {
+    key: 'highlightSelectedIndex',
+    value: function highlightSelectedIndex() {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.list[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var item = _step.value;
+
+          item.classList.remove('is-selected');
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      this.list[this.selectedIndex].classList.add('is-selected');
+    }
+  }, {
     key: 'setSuggestion',
     value: function setSuggestion() {
       var suggestions = arguments[0] === undefined ? [] : arguments[0];
@@ -201,6 +212,7 @@ var TextareaSuggestion = (function () {
         suggestions = [suggestions];
       }
 
+      this.suggestions.length = 0;
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
@@ -233,22 +245,22 @@ var TextareaSuggestion = (function () {
   }, {
     key: 'prepareSuggestionPopup',
     value: function prepareSuggestionPopup() {
-      var _this2 = this;
+      var _this = this;
 
       if (this.container == null) {
         this.container = document.createElement('ul');
+        this.container.className = 'suggestion';
         this.container.style.position = 'absolute';
         this.container.style.display = 'none';
         this.container.style.listStyle = 'none';
-        this.container.style.border = '1px solid #ccc';
       }
 
       this.list.length = 0;
       this.container.innerHTML = '';
 
       var onClick = function onClick(e) {
-        _this2.insertSuggestion(e.target.textContent);
-        _this2.hidePopup();
+        _this.insertSuggestion(e.target.textContent);
+        _this.hidePopup();
       };
 
       var _iteratorNormalCompletion3 = true;
@@ -260,6 +272,7 @@ var TextareaSuggestion = (function () {
           var suggestion = _step3.value;
 
           var item = document.createElement('li');
+          item.className = 'suggestion__item';
           item.textContent = suggestion;
           item.addEventListener('click', onClick);
           this.list.push(item);
@@ -293,17 +306,20 @@ var TextareaSuggestion = (function () {
   }, {
     key: 'showPopup',
     value: function showPopup() {
-      var coordinates = getCaretCoordinates(this.textarea, this.textarea.selectionEnd);
-      var top = this.textarea.offsetTop + coordinates.top;
-      var left = this.textarea.offsetLeft + coordinates.left;
-      this.container.style.top = top + this.textareaFontSize + 'px';
-      this.container.style.left = left + 'px';
+      var position = this.popupPosition;
+      this.container.style.top = position.top + this.textareaFontSize + 'px';
+      this.container.style.left = position.left + 'px';
       this.container.style.display = 'block';
+
+      this.container.classList.add('is-shown');
     }
   }, {
     key: 'hidePopup',
     value: function hidePopup() {
       this.container.style.display = 'none';
+      this.selectedIndex = -1;
+
+      this.container.classList.remove('is-shown');
       var _iteratorNormalCompletion4 = true;
       var _didIteratorError4 = false;
       var _iteratorError4 = undefined;
@@ -312,7 +328,7 @@ var TextareaSuggestion = (function () {
         for (var _iterator4 = this.list[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
           var item = _step4.value;
 
-          item.style.background = 'white';
+          item.classList.remove('is-selected');
         }
       } catch (err) {
         _didIteratorError4 = true;
@@ -328,8 +344,25 @@ var TextareaSuggestion = (function () {
           }
         }
       }
-
-      this.selectedIndex = -1;
+    }
+  }, {
+    key: 'isSelected',
+    get: function () {
+      return this.isShown && this.selectedIndex !== -1;
+    }
+  }, {
+    key: 'isShown',
+    get: function () {
+      return this.container.classList.contains('is-shown');
+    }
+  }, {
+    key: 'popupPosition',
+    get: function () {
+      var coordinates = getCaretCoordinates(this.textarea, this.textarea.selectionEnd);
+      return {
+        top: this.textarea.offsetTop + coordinates.top,
+        left: this.textarea.offsetLeft + coordinates.left
+      };
     }
   }]);
 
