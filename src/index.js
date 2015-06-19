@@ -1,3 +1,5 @@
+require('string.prototype.startswith');
+
 const getCaretCoordinates = require('textarea-caret-position/index.js');
 
 class TextareaSuggestion {
@@ -21,12 +23,15 @@ class TextareaSuggestion {
     this.list = [];
 
     this.setSuggestion(suggestions);
+    this.prepareContainer();
 
     this.selectionStart = 0;
     this.selectionEnd   = 0;
+    this.inputText      = '';
+    this.lastInputText  = '';
+    this.isDeleted      = false;
 
     textarea.addEventListener('input', this.onInput.bind(this));
-
     textarea.addEventListener('keydown', this.onKeyDown.bind(this));
   }
 
@@ -40,26 +45,45 @@ class TextareaSuggestion {
 
   onInput(e) {
     this.selectionStart = e.target.selectionStart;
-    this.selectionEnd  = e.target.selectionEnd;
-    let inputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
-    if (this.suggestions.every(suggestion => suggestion.substring(0, 1) !== inputText)) {
-      this.container.style.display = 'none';
-      return;
+    this.selectionEnd   = e.target.selectionEnd;
+    this.lastInputText  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+
+    if (this.isShown && !this.isDeleted) {
+      this.inputText += this.lastInputText;
+    } else {
+      this.inputText = this.lastInputText;
     }
-    this.showPopup();
+
+    if (this.inputText.length !== 0 && this.matchedSuggestions.length !== 0) {
+      this.prepareItems();
+      this.showPopup();
+    } else {
+      this.hidePopup();
+    }
+  }
+
+  get matchedSuggestions() {
+    return this.suggestions.filter(suggestion => suggestion.startsWith(this.inputText));
   }
 
   onKeyDown(e) {
     switch (e.keyCode) {
-      case 13:
+      case 8://del
+        if (this.isShown) {
+          let lastIndex = this.inputText.lastIndexOf(this.lastInputText);
+          this.inputText = this.inputText.substring(0, lastIndex);
+          this.isDeleted = true;
+        }
+        break;
+      case 13://enter
         if (this.isSelected) {
           e.preventDefault();
-          let suggestion = this.suggestions[this.selectedIndex];
+          let suggestion = this.matchedSuggestions[this.selectedIndex];
           this.insertSuggestion(suggestion);
         }
         this.hidePopup();
         break;
-      case 38:
+      case 38://up
         if (this.selectedIndex > 0) {
           this.selectedIndex--;
         }
@@ -68,8 +92,8 @@ class TextareaSuggestion {
           this.highlightSelectedIndex();
         }
         break;
-      case 40:
-        if (this.selectedIndex < this.suggestions.length - 1) {
+      case 40://down
+        if (this.selectedIndex < this.matchedSuggestions.length - 1) {
           this.selectedIndex++;
         }
         if (this.isShown) {
@@ -78,7 +102,11 @@ class TextareaSuggestion {
         }
         break;
       default:
-        this.hidePopup();
+        if (this.isShown) {
+          this.isDeleted = false;
+        } else {
+          this.hidePopup();
+        }
         break;
     }
   }
@@ -102,42 +130,41 @@ class TextareaSuggestion {
         this.suggestions.push(suggestion);
       }
     }
-
-    this.prepareSuggestionPopup();
   }
 
-  prepareSuggestionPopup() {
-
+  prepareContainer() {
     if (this.container == null) {
       this.container = document.createElement('ul');
       this.container.className = 'suggestion';
       this.container.style.position = 'absolute';
       this.container.style.display = 'none';
       this.container.style.listStyle = 'none';
+      document.body.appendChild(this.container);
     }
+  }
+
+  onClick(e) {
+    this.insertSuggestion(e.target.textContent);
+    this.hidePopup();
+  }
+
+  prepareItems() {
 
     this.list.length = 0;
     this.container.innerHTML = '';
 
-    const onClick = e => {
-      this.insertSuggestion(e.target.textContent);
-      this.hidePopup();
-    }
-
-    for (let suggestion of this.suggestions) {
+    for (let suggestion of this.matchedSuggestions) {
       let item = document.createElement('li');
       item.className = 'suggestion__item';
       item.textContent = suggestion;
-      item.addEventListener('click', onClick);
+      item.addEventListener('click', this.onClick.bind(this));
       this.list.push(item);
       this.container.appendChild(item);
     }
-
-    document.body.appendChild(this.container);
   }
 
   insertSuggestion(suggestion) {
-    this.textarea.setSelectionRange(this.selectionEnd - 1, this.selectionEnd);
+    this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
     this.textarea.setRangeText(suggestion);
     let caretIndex = this.selectionEnd + suggestion.length;
     this.textarea.setSelectionRange(caretIndex, caretIndex);

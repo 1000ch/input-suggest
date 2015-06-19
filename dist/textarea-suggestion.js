@@ -82,6 +82,63 @@
 })();
 
 },{}],2:[function(require,module,exports){
+/*! http://mths.be/startswith v0.2.0 by @mathias */
+if (!String.prototype.startsWith) {
+	(function() {
+		'use strict'; // needed to support `apply`/`call` with `undefined`/`null`
+		var defineProperty = (function() {
+			// IE 8 only supports `Object.defineProperty` on DOM elements
+			try {
+				var object = {};
+				var $defineProperty = Object.defineProperty;
+				var result = $defineProperty(object, object, object) && $defineProperty;
+			} catch(error) {}
+			return result;
+		}());
+		var toString = {}.toString;
+		var startsWith = function(search) {
+			if (this == null) {
+				throw TypeError();
+			}
+			var string = String(this);
+			if (search && toString.call(search) == '[object RegExp]') {
+				throw TypeError();
+			}
+			var stringLength = string.length;
+			var searchString = String(search);
+			var searchLength = searchString.length;
+			var position = arguments.length > 1 ? arguments[1] : undefined;
+			// `ToInteger`
+			var pos = position ? Number(position) : 0;
+			if (pos != pos) { // better `isNaN`
+				pos = 0;
+			}
+			var start = Math.min(Math.max(pos, 0), stringLength);
+			// Avoid the `indexOf` call if no match is possible
+			if (searchLength + start > stringLength) {
+				return false;
+			}
+			var index = -1;
+			while (++index < searchLength) {
+				if (string.charCodeAt(start + index) != searchString.charCodeAt(index)) {
+					return false;
+				}
+			}
+			return true;
+		};
+		if (defineProperty) {
+			defineProperty(String.prototype, 'startsWith', {
+				'value': startsWith,
+				'configurable': true,
+				'writable': true
+			});
+		} else {
+			String.prototype.startsWith = startsWith;
+		}
+	}());
+}
+
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -91,6 +148,8 @@ Object.defineProperty(exports, '__esModule', {
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+require('string.prototype.startswith');
 
 var getCaretCoordinates = require("./../bower_components/textarea-caret-position/index.js");
 
@@ -115,12 +174,15 @@ var TextareaSuggestion = (function () {
     this.list = [];
 
     this.setSuggestion(suggestions);
+    this.prepareContainer();
 
     this.selectionStart = 0;
     this.selectionEnd = 0;
+    this.inputText = '';
+    this.lastInputText = '';
+    this.isDeleted = false;
 
     textarea.addEventListener('input', this.onInput.bind(this));
-
     textarea.addEventListener('keydown', this.onKeyDown.bind(this));
   }
 
@@ -129,28 +191,48 @@ var TextareaSuggestion = (function () {
     value: function onInput(e) {
       this.selectionStart = e.target.selectionStart;
       this.selectionEnd = e.target.selectionEnd;
-      var inputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
-      if (this.suggestions.every(function (suggestion) {
-        return suggestion.substring(0, 1) !== inputText;
-      })) {
-        this.container.style.display = 'none';
-        return;
+      this.lastInputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+
+      if (this.isShown) {
+        if (this.isDeleted) {
+          console.log(this.lastInputText);
+        } else {
+          this.inputText += this.lastInputText;
+        }
+      } else {
+        this.inputText = this.lastInputText;
       }
-      this.showPopup();
+
+      if (this.inputText.length !== 0 && this.matchedSuggestions.length !== 0) {
+        this.prepareItems();
+        this.showPopup();
+      } else {
+        this.hidePopup();
+      }
     }
   }, {
     key: 'onKeyDown',
     value: function onKeyDown(e) {
       switch (e.keyCode) {
+        case 8:
+          //del
+          if (this.isShown) {
+            var lastIndex = this.inputText.lastIndexOf(this.lastInputText);
+            this.inputText = this.inputText.substring(0, lastIndex);
+            this.isDeleted = true;
+          }
+          break;
         case 13:
+          //enter
           if (this.isSelected) {
             e.preventDefault();
-            var suggestion = this.suggestions[this.selectedIndex];
+            var suggestion = this.matchedSuggestions[this.selectedIndex];
             this.insertSuggestion(suggestion);
           }
           this.hidePopup();
           break;
         case 38:
+          //up
           if (this.selectedIndex > 0) {
             this.selectedIndex--;
           }
@@ -160,7 +242,8 @@ var TextareaSuggestion = (function () {
           }
           break;
         case 40:
-          if (this.selectedIndex < this.suggestions.length - 1) {
+          //down
+          if (this.selectedIndex < this.matchedSuggestions.length - 1) {
             this.selectedIndex++;
           }
           if (this.isShown) {
@@ -169,7 +252,11 @@ var TextareaSuggestion = (function () {
           }
           break;
         default:
-          this.hidePopup();
+          if (this.isShown) {
+            this.isDeleted = false;
+          } else {
+            this.hidePopup();
+          }
           break;
       }
     }
@@ -239,42 +326,44 @@ var TextareaSuggestion = (function () {
           }
         }
       }
-
-      this.prepareSuggestionPopup();
     }
   }, {
-    key: 'prepareSuggestionPopup',
-    value: function prepareSuggestionPopup() {
-      var _this = this;
-
+    key: 'prepareContainer',
+    value: function prepareContainer() {
       if (this.container == null) {
         this.container = document.createElement('ul');
         this.container.className = 'suggestion';
         this.container.style.position = 'absolute';
         this.container.style.display = 'none';
         this.container.style.listStyle = 'none';
+        document.body.appendChild(this.container);
       }
+    }
+  }, {
+    key: 'onClick',
+    value: function onClick(e) {
+      this.insertSuggestion(e.target.textContent);
+      this.hidePopup();
+    }
+  }, {
+    key: 'prepareItems',
+    value: function prepareItems() {
 
       this.list.length = 0;
       this.container.innerHTML = '';
-
-      var onClick = function onClick(e) {
-        _this.insertSuggestion(e.target.textContent);
-        _this.hidePopup();
-      };
 
       var _iteratorNormalCompletion3 = true;
       var _didIteratorError3 = false;
       var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator3 = this.suggestions[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        for (var _iterator3 = this.matchedSuggestions[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
           var suggestion = _step3.value;
 
           var item = document.createElement('li');
           item.className = 'suggestion__item';
           item.textContent = suggestion;
-          item.addEventListener('click', onClick);
+          item.addEventListener('click', this.onClick.bind(this));
           this.list.push(item);
           this.container.appendChild(item);
         }
@@ -292,13 +381,11 @@ var TextareaSuggestion = (function () {
           }
         }
       }
-
-      document.body.appendChild(this.container);
     }
   }, {
     key: 'insertSuggestion',
     value: function insertSuggestion(suggestion) {
-      this.textarea.setSelectionRange(this.selectionEnd - 1, this.selectionEnd);
+      this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
       this.textarea.setRangeText(suggestion);
       var caretIndex = this.selectionEnd + suggestion.length;
       this.textarea.setSelectionRange(caretIndex, caretIndex);
@@ -356,6 +443,15 @@ var TextareaSuggestion = (function () {
       return this.container.classList.contains('is-shown');
     }
   }, {
+    key: 'matchedSuggestions',
+    get: function () {
+      var _this = this;
+
+      return this.suggestions.filter(function (suggestion) {
+        return suggestion.startsWith(_this.inputText);
+      });
+    }
+  }, {
     key: 'popupPosition',
     get: function () {
       var coordinates = getCaretCoordinates(this.textarea, this.textarea.selectionEnd);
@@ -372,5 +468,5 @@ var TextareaSuggestion = (function () {
 exports['default'] = TextareaSuggestion;
 module.exports = exports['default'];
 
-},{"./../bower_components/textarea-caret-position/index.js":1}]},{},[2])(2)
+},{"./../bower_components/textarea-caret-position/index.js":1,"string.prototype.startswith":2}]},{},[3])(3)
 });
