@@ -34,7 +34,8 @@
     <script src="dist/textarea-suggestion.js"></script>
     <script>
       var textarea   = document.querySelector('textarea');
-      var suggestion = new TextareaSuggestion(textarea, ['(^_^)', '(´・ω・`)', '( ｰ`дｰ´)']);
+      var suggestion = new TextareaSuggestion(textarea);
+      suggestion.setSuggestion(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
     </script>
   </body>
 </html>

@@ -43,13 +43,30 @@ class TextareaSuggestion {
     return this.container.classList.contains('is-shown');
   }
 
+  get matchedSuggestions() {
+    return this.suggestions.filter(suggestion => suggestion.startsWith(this.inputText));
+  }
+
+  get selectedSuggestion() {
+    return this.matchedSuggestions[this.selectedIndex];
+  }
+
   onInput(e) {
     this.selectionStart = e.target.selectionStart;
     this.selectionEnd   = e.target.selectionEnd;
-    this.lastInputText  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
 
-    if (this.isShown && !this.isDeleted) {
-      this.inputText += this.lastInputText;
+    if (this.isDeleted) {
+      this.lastInputText = '';
+    } else {
+      this.lastInputText  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+    }
+
+    if (this.isShown) {
+      if (this.isDeleted && this.inputText.length !== 0) {
+        this.inputText = this.inputText.substring(0, this.inputText.length - 1);
+      } else {
+        this.inputText += this.lastInputText;
+      }
     } else {
       this.inputText = this.lastInputText;
     }
@@ -62,24 +79,15 @@ class TextareaSuggestion {
     }
   }
 
-  get matchedSuggestions() {
-    return this.suggestions.filter(suggestion => suggestion.startsWith(this.inputText));
-  }
-
   onKeyDown(e) {
     switch (e.keyCode) {
       case 8://del
-        if (this.isShown) {
-          let lastIndex = this.inputText.lastIndexOf(this.lastInputText);
-          this.inputText = this.inputText.substring(0, lastIndex);
-          this.isDeleted = true;
-        }
+        this.isDeleted = true;
         break;
       case 13://enter
         if (this.isSelected) {
           e.preventDefault();
-          let suggestion = this.matchedSuggestions[this.selectedIndex];
-          this.insertSuggestion(suggestion);
+          this.insertText(this.selectedSuggestion);
         }
         this.hidePopup();
         break;
@@ -102,11 +110,7 @@ class TextareaSuggestion {
         }
         break;
       default:
-        if (this.isShown) {
-          this.isDeleted = false;
-        } else {
-          this.hidePopup();
-        }
+        this.isDeleted = false;
         break;
     }
   }
@@ -143,8 +147,8 @@ class TextareaSuggestion {
     }
   }
 
-  onClick(e) {
-    this.insertSuggestion(e.target.textContent);
+  onSuggestionClick(e) {
+    this.insertText(e.target.textContent);
     this.hidePopup();
   }
 
@@ -157,16 +161,16 @@ class TextareaSuggestion {
       let item = document.createElement('li');
       item.className = 'suggestion__item';
       item.textContent = suggestion;
-      item.addEventListener('click', this.onClick.bind(this));
+      item.addEventListener('click', this.onSuggestionClick.bind(this));
       this.list.push(item);
       this.container.appendChild(item);
     }
   }
 
-  insertSuggestion(suggestion) {
+  insertText(text) {
     this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
-    this.textarea.setRangeText(suggestion);
-    let caretIndex = this.selectionEnd + suggestion.length;
+    this.textarea.setRangeText(text);
+    let caretIndex = this.selectionEnd + text.length;
     this.textarea.setSelectionRange(caretIndex, caretIndex);
   }
 

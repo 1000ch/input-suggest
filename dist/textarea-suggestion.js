@@ -191,11 +191,16 @@ var TextareaSuggestion = (function () {
     value: function onInput(e) {
       this.selectionStart = e.target.selectionStart;
       this.selectionEnd = e.target.selectionEnd;
-      this.lastInputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+
+      if (this.isDeleted) {
+        this.lastInputText = '';
+      } else {
+        this.lastInputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+      }
 
       if (this.isShown) {
-        if (this.isDeleted) {
-          console.log(this.lastInputText);
+        if (this.isDeleted && this.inputText.length !== 0) {
+          this.inputText = this.inputText.substring(0, this.inputText.length - 1);
         } else {
           this.inputText += this.lastInputText;
         }
@@ -216,18 +221,13 @@ var TextareaSuggestion = (function () {
       switch (e.keyCode) {
         case 8:
           //del
-          if (this.isShown) {
-            var lastIndex = this.inputText.lastIndexOf(this.lastInputText);
-            this.inputText = this.inputText.substring(0, lastIndex);
-            this.isDeleted = true;
-          }
+          this.isDeleted = true;
           break;
         case 13:
           //enter
           if (this.isSelected) {
             e.preventDefault();
-            var suggestion = this.matchedSuggestions[this.selectedIndex];
-            this.insertSuggestion(suggestion);
+            this.insertText(this.selectedSuggestion);
           }
           this.hidePopup();
           break;
@@ -252,11 +252,7 @@ var TextareaSuggestion = (function () {
           }
           break;
         default:
-          if (this.isShown) {
-            this.isDeleted = false;
-          } else {
-            this.hidePopup();
-          }
+          this.isDeleted = false;
           break;
       }
     }
@@ -340,9 +336,9 @@ var TextareaSuggestion = (function () {
       }
     }
   }, {
-    key: 'onClick',
-    value: function onClick(e) {
-      this.insertSuggestion(e.target.textContent);
+    key: 'onSuggestionClick',
+    value: function onSuggestionClick(e) {
+      this.insertText(e.target.textContent);
       this.hidePopup();
     }
   }, {
@@ -363,7 +359,7 @@ var TextareaSuggestion = (function () {
           var item = document.createElement('li');
           item.className = 'suggestion__item';
           item.textContent = suggestion;
-          item.addEventListener('click', this.onClick.bind(this));
+          item.addEventListener('click', this.onSuggestionClick.bind(this));
           this.list.push(item);
           this.container.appendChild(item);
         }
@@ -383,11 +379,11 @@ var TextareaSuggestion = (function () {
       }
     }
   }, {
-    key: 'insertSuggestion',
-    value: function insertSuggestion(suggestion) {
+    key: 'insertText',
+    value: function insertText(text) {
       this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
-      this.textarea.setRangeText(suggestion);
-      var caretIndex = this.selectionEnd + suggestion.length;
+      this.textarea.setRangeText(text);
+      var caretIndex = this.selectionEnd + text.length;
       this.textarea.setSelectionRange(caretIndex, caretIndex);
     }
   }, {
@@ -450,6 +446,11 @@ var TextareaSuggestion = (function () {
       return this.suggestions.filter(function (suggestion) {
         return suggestion.startsWith(_this.inputText);
       });
+    }
+  }, {
+    key: 'selectedSuggestion',
+    get: function () {
+      return this.matchedSuggestions[this.selectedIndex];
     }
   }, {
     key: 'popupPosition',
