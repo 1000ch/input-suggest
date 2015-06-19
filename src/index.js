@@ -15,6 +15,8 @@ class TextareaSuggestion {
     this.selectedIndex = -1;
     this.suggestions = [];
     this.textarea  = textarea;
+    this.textareaStyle = getComputedStyle(this.textarea)
+    this.textareaFontSize = this.textareaStyle['font-size'].replace('px', '') - 0;
     this.container = null;
     this.list = [];
 
@@ -31,12 +33,7 @@ class TextareaSuggestion {
         this.container.style.display = 'none';
         return;
       }
-      let coordinates = getCaretCoordinates(e.target, e.target.selectionEnd);
-      let top = this.textarea.offsetTop + coordinates.top;
-      let left = this.textarea.offsetLeft + coordinates.left;
-      this.container.style.display = 'block';
-      this.container.style.top = top + 30 + 'px';
-      this.container.style.left = left + 'px';
+      this.showPopup();
     });
 
     textarea.addEventListener('keydown', e => {
@@ -46,13 +43,8 @@ class TextareaSuggestion {
           if (this.container.style.display === 'block') {
             e.preventDefault();
             let suggestion = this.suggestions[this.selectedIndex];
-            this.textarea.setSelectionRange(this.selectionEnd - 1, this.selectionEnd);
-            this.textarea.setRangeText(suggestion);
-            this.container.style.display = 'none';
-            for (let item of this.list) {
-              item.style.background = 'white';
-            }
-            this.selectedIndex = -1;
+            this.insertSuggestion(suggestion);
+            this.hidePopup();
           }
           break;
         case 38:
@@ -66,7 +58,7 @@ class TextareaSuggestion {
           }
           break;
         default:
-          this.selectedIndex = -1;
+          this.hidePopup();
           break;
       }
 
@@ -92,10 +84,10 @@ class TextareaSuggestion {
       }
     }
 
-    this.prepareSuggestion();
+    this.prepareSuggestionPopup();
   }
 
-  prepareSuggestion() {
+  prepareSuggestionPopup() {
 
     if (this.container == null) {
       this.container = document.createElement('ul');
@@ -109,9 +101,8 @@ class TextareaSuggestion {
     this.container.innerHTML = '';
 
     const onClick = e => {
-      this.textarea.setSelectionRange(this.selectionEnd - 1, this.selectionEnd);
-      this.textarea.setRangeText(e.target.textContent);
-      this.container.style.display = 'none';
+      this.insertSuggestion(e.target.textContent);
+      this.hidePopup();
     }
 
     for (let suggestion of this.suggestions) {
@@ -123,6 +114,30 @@ class TextareaSuggestion {
     }
 
     document.body.appendChild(this.container);
+  }
+
+  insertSuggestion(suggestion) {
+    this.textarea.setSelectionRange(this.selectionEnd - 1, this.selectionEnd);
+    this.textarea.setRangeText(suggestion);
+    let caretIndex = this.selectionEnd + suggestion.length;
+    this.textarea.setSelectionRange(caretIndex, caretIndex);
+  }
+
+  showPopup() {
+    let coordinates = getCaretCoordinates(this.textarea, this.textarea.selectionEnd);
+    let top = this.textarea.offsetTop + coordinates.top;
+    let left = this.textarea.offsetLeft + coordinates.left;
+    this.container.style.top = top + this.textareaFontSize + 'px';
+    this.container.style.left = left + 'px';
+    this.container.style.display = 'block';
+  }
+
+  hidePopup() {
+    this.container.style.display = 'none';
+    for (let item of this.list) {
+      item.style.background = 'white';
+    }
+    this.selectedIndex = -1;
   }
 }
 
