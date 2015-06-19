@@ -1,0 +1,19 @@
+{
+  "name": "textarea-suggestion",
+  "version": "0.0.0",
+  "authors": [
+    "1000ch <shogo.sensui@gmail.com>"
+  ],
+  "description": "Textarea Suggestion",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "textarea-caret-position": "component/textarea-caret-position#~3.0.0"
+  }
+}
