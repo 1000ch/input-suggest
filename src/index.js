@@ -16,7 +16,7 @@ class TextareaSuggestion {
     this.suggestions = [];
     this.textarea  = textarea;
     this.textareaStyle = getComputedStyle(this.textarea)
-    this.textareaFontSize = this.textareaStyle['font-size'].replace('px', '') - 0;
+    this.textareaFontSize = this.textareaStyle['font-size'].replace(/(px)/, '') - 0;
     this.container = null;
     this.list = [];
 
@@ -25,51 +25,69 @@ class TextareaSuggestion {
     this.selectionStart = 0;
     this.selectionEnd   = 0;
 
-    textarea.addEventListener('input', e => {
-      this.selectionStart = e.target.selectionStart;
-      this.selectionEnd  = e.target.selectionEnd;
-      let inputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
-      if (this.suggestions.every(suggestion => suggestion.substring(0, 1) !== inputText)) {
-        this.container.style.display = 'none';
-        return;
-      }
-      this.showPopup();
-    });
+    textarea.addEventListener('input', this.onInput.bind(this));
 
-    textarea.addEventListener('keydown', e => {
+    textarea.addEventListener('keydown', this.onKeyDown.bind(this));
+  }
 
-      switch (e.keyCode) {
-        case 13:
-          if (this.container.style.display === 'block') {
-            e.preventDefault();
-            let suggestion = this.suggestions[this.selectedIndex];
-            this.insertSuggestion(suggestion);
-            this.hidePopup();
-          }
-          break;
-        case 38:
-          if (this.selectedIndex > 0) {
-            this.selectedIndex--;
-          }
-          break;
-        case 40:
-          if (this.selectedIndex < this.suggestions.length - 1) {
-            this.selectedIndex++;
-          }
-          break;
-        default:
-          this.hidePopup();
-          break;
-      }
+  get isSelected() {
+    return this.isShown && this.selectedIndex !== -1;
+  }
 
-      if (this.container.style.display === 'block') {
-        e.preventDefault();
-        for (let item of this.list) {
-          item.style.background = 'white';
+  get isShown() {
+    return this.container.classList.contains('is-shown');
+  }
+
+  onInput(e) {
+    this.selectionStart = e.target.selectionStart;
+    this.selectionEnd  = e.target.selectionEnd;
+    let inputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+    if (this.suggestions.every(suggestion => suggestion.substring(0, 1) !== inputText)) {
+      this.container.style.display = 'none';
+      return;
+    }
+    this.showPopup();
+  }
+
+  onKeyDown(e) {
+    switch (e.keyCode) {
+      case 13:
+        if (this.isSelected) {
+          e.preventDefault();
+          let suggestion = this.suggestions[this.selectedIndex];
+          this.insertSuggestion(suggestion);
         }
-        this.list[this.selectedIndex].style.background = 'red';
-      }
-    });
+        this.hidePopup();
+        break;
+      case 38:
+        if (this.selectedIndex > 0) {
+          this.selectedIndex--;
+        }
+        if (this.isShown) {
+          e.preventDefault();
+          this.highlightSelectedIndex();
+        }
+        break;
+      case 40:
+        if (this.selectedIndex < this.suggestions.length - 1) {
+          this.selectedIndex++;
+        }
+        if (this.isShown) {
+          e.preventDefault();
+          this.highlightSelectedIndex();
+        }
+        break;
+      default:
+        this.hidePopup();
+        break;
+    }
+  }
+
+  highlightSelectedIndex() {
+    for (let item of this.list) {
+      item.classList.remove('is-selected');
+    }
+    this.list[this.selectedIndex].classList.add('is-selected');
   }
 
   setSuggestion(suggestions = []) {
@@ -78,6 +96,7 @@ class TextareaSuggestion {
       suggestions = [suggestions];
     }
 
+    this.suggestions.length = 0;
     for (let suggestion of suggestions) {
       if (typeof suggestion === 'string') {
         this.suggestions.push(suggestion);
@@ -91,10 +110,10 @@ class TextareaSuggestion {
 
     if (this.container == null) {
       this.container = document.createElement('ul');
+      this.container.className = 'suggestion';
       this.container.style.position = 'absolute';
       this.container.style.display = 'none';
       this.container.style.listStyle = 'none';
-      this.container.style.border = '1px solid #ccc';
     }
 
     this.list.length = 0;
@@ -107,6 +126,7 @@ class TextareaSuggestion {
 
     for (let suggestion of this.suggestions) {
       let item = document.createElement('li');
+      item.className = 'suggestion__item';
       item.textContent = suggestion;
       item.addEventListener('click', onClick);
       this.list.push(item);
@@ -123,21 +143,31 @@ class TextareaSuggestion {
     this.textarea.setSelectionRange(caretIndex, caretIndex);
   }
 
-  showPopup() {
+  get popupPosition() {
     let coordinates = getCaretCoordinates(this.textarea, this.textarea.selectionEnd);
-    let top = this.textarea.offsetTop + coordinates.top;
-    let left = this.textarea.offsetLeft + coordinates.left;
-    this.container.style.top = top + this.textareaFontSize + 'px';
-    this.container.style.left = left + 'px';
+    return {
+      top: this.textarea.offsetTop + coordinates.top,
+      left: this.textarea.offsetLeft + coordinates.left
+    }
+  }
+
+  showPopup() {
+    let position = this.popupPosition;
+    this.container.style.top = position.top + this.textareaFontSize + 'px';
+    this.container.style.left = position.left + 'px';
     this.container.style.display = 'block';
+
+    this.container.classList.add('is-shown');
   }
 
   hidePopup() {
     this.container.style.display = 'none';
-    for (let item of this.list) {
-      item.style.background = 'white';
-    }
     this.selectedIndex = -1;
+
+    this.container.classList.remove('is-shown');
+    for (let item of this.list) {
+      item.classList.remove('is-selected');
+    }
   }
 }
 

@@ -1,15 +1,33 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>textarea-suggestion</title>
     <style>
+      body {
+        font-family: 'Roboto Mono';
+      }
       textarea {
         width: 240px;
         height: 240px;
         font-size: 24px;
-        font-family: Roboto;
+        font-family: 'Roboto Mono';
+      }
+      .suggestion {
+        border: 1px solid #ccc;
+        padding: 0;
+        overflow: scroll;
+      }
+      .suggestion__item {
+        font-size: 24px;
+        background-color: #fff;
+        padding: 5px;
+      }
+      .is-selected {
+        background-color: #ccf;
       }
     </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto Mono:400,700">
   </head>
   <body>
     <textarea></textarea>
