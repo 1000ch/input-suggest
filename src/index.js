@@ -1,5 +1,3 @@
-require('string.prototype.startswith');
-
 const TextArea   = require('./textarea');
 const Suggestion = require('./suggestion');
 
@@ -81,4 +79,8 @@ class TextAreaSuggestion {
   }
 }
 
-export default TextAreaSuggestion;
+if (module !== undefined && module.exports !== undefined) {
+  module.exports = TextAreaSuggestion;
+} else {
+  window.TextAreaSuggestion = TextAreaSuggestion;
+}

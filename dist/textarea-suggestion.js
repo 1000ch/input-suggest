@@ -302,63 +302,6 @@ function isUndefined(arg) {
 }
 
 },{}],2:[function(require,module,exports){
-/*! http://mths.be/startswith v0.2.0 by @mathias */
-if (!String.prototype.startsWith) {
-	(function() {
-		'use strict'; // needed to support `apply`/`call` with `undefined`/`null`
-		var defineProperty = (function() {
-			// IE 8 only supports `Object.defineProperty` on DOM elements
-			try {
-				var object = {};
-				var $defineProperty = Object.defineProperty;
-				var result = $defineProperty(object, object, object) && $defineProperty;
-			} catch(error) {}
-			return result;
-		}());
-		var toString = {}.toString;
-		var startsWith = function(search) {
-			if (this == null) {
-				throw TypeError();
-			}
-			var string = String(this);
-			if (search && toString.call(search) == '[object RegExp]') {
-				throw TypeError();
-			}
-			var stringLength = string.length;
-			var searchString = String(search);
-			var searchLength = searchString.length;
-			var position = arguments.length > 1 ? arguments[1] : undefined;
-			// `ToInteger`
-			var pos = position ? Number(position) : 0;
-			if (pos != pos) { // better `isNaN`
-				pos = 0;
-			}
-			var start = Math.min(Math.max(pos, 0), stringLength);
-			// Avoid the `indexOf` call if no match is possible
-			if (searchLength + start > stringLength) {
-				return false;
-			}
-			var index = -1;
-			while (++index < searchLength) {
-				if (string.charCodeAt(start + index) != searchString.charCodeAt(index)) {
-					return false;
-				}
-			}
-			return true;
-		};
-		if (defineProperty) {
-			defineProperty(String.prototype, 'startsWith', {
-				'value': startsWith,
-				'configurable': true,
-				'writable': true
-			});
-		} else {
-			String.prototype.startsWith = startsWith;
-		}
-	}());
-}
-
-},{}],3:[function(require,module,exports){
 /* jshint browser: true */
 
 (function () {
@@ -474,18 +417,12 @@ if (typeof module != "undefined" && typeof module.exports != "undefined") {
 
 }());
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-require('string.prototype.startswith');
 
 var TextArea = require('./textarea');
 var Suggestion = require('./suggestion');
@@ -575,10 +512,13 @@ var TextAreaSuggestion = (function () {
   return TextAreaSuggestion;
 })();
 
-exports['default'] = TextAreaSuggestion;
-module.exports = exports['default'];
+if (module !== undefined && module.exports !== undefined) {
+  module.exports = TextAreaSuggestion;
+} else {
+  window.TextAreaSuggestion = TextAreaSuggestion;
+}
 
-},{"./suggestion":5,"./textarea":6,"string.prototype.startswith":2}],5:[function(require,module,exports){
+},{"./suggestion":4,"./textarea":5}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -809,7 +749,7 @@ var Suggestion = (function (_EventEmitter) {
 exports['default'] = Suggestion;
 module.exports = exports['default'];
 
-},{"events":1}],6:[function(require,module,exports){
+},{"events":1}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -927,5 +867,5 @@ var TextArea = (function (_EventEmitter) {
 exports['default'] = TextArea;
 module.exports = exports['default'];
 
-},{"events":1,"textarea-caret-position/index.js":3}]},{},[4])(4)
+},{"events":1,"textarea-caret-position/index.js":2}]},{},[3])(3)
 });

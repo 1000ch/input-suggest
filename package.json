@@ -2,7 +2,7 @@
   "name": "textarea-suggestion",
   "version": "1.0.0",
   "description": "Textarea Suggestion",
-  "main": "index.js",
+  "main": "dist/textarea-suggestion.js",
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",
@@ -21,7 +21,6 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "string.prototype.startswith": "^0.2.0",
     "textarea-caret-position": "git+https://github.com/component/textarea-caret-position.git"
   }
 }
