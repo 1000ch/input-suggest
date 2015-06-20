@@ -1,3 +1,5 @@
+require("babel/polyfill");
+
 const TextArea   = require('./textarea');
 const Suggestion = require('./suggestion');
 
