@@ -30,10 +30,11 @@ export default class Suggestion extends EventEmitter {
     this.list.length = 0;
     this.container.innerHTML = '';
 
-    for (let suggestion of this.matched) {
+    for (let suggestion of this.matchedItems) {
       let item = document.createElement('li');
       item.className = 'suggestion__item';
       item.textContent = suggestion;
+      item.setAttribute('data-suggestion', suggestion);
       item.addEventListener('click', this.onClick.bind(this));
       this.list.push(item);
       this.container.appendChild(item);
@@ -45,6 +46,7 @@ export default class Suggestion extends EventEmitter {
   }
 
   setSuggestions(suggestions = []) {
+
     if (!Array.isArray(suggestions)) {
       suggestions = [suggestions];
     }
@@ -65,12 +67,12 @@ export default class Suggestion extends EventEmitter {
     return this.container.classList.contains('is-shown');
   }
 
-  get matched() {
+  get matchedItems() {
     return this.suggestions.filter(suggestion => suggestion.indexOf(this.matcher) !== -1);
   }
 
-  get selected() {
-    return this.matched[this.selectedIndex];
+  get selectedItem() {
+    return this.matchedItems[this.selectedIndex];
   }
 
   show(top, left) {

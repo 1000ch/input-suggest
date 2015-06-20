@@ -33,7 +33,7 @@ class TextAreaSuggestion {
 
       this.suggestion.setMatcher(this.text);
 
-      if (this.text.length !== 0 && this.suggestion.matched.length !== 0) {
+      if (this.text.length !== 0 && this.suggestion.matchedItems.length !== 0) {
         let position = this.textArea.popupPosition;
         this.suggestion.prepareItems();
         this.suggestion.show(position.top, position.left);
@@ -45,7 +45,7 @@ class TextAreaSuggestion {
     this.textArea.on('enter', e => {
       if (this.suggestion.isSelected) {
         e.preventDefault();
-        this.textArea.insert(this.text, this.suggestion.selected);
+        this.textArea.insert(this.text, this.suggestion.selectedItem);
       }
       this.suggestion.hide();
     });
@@ -63,7 +63,7 @@ class TextAreaSuggestion {
     this.textArea.on('down', e => {
       if (this.suggestion.isShown) {
         e.preventDefault();
-        if (this.suggestion.selectedIndex < this.suggestion.matched.length - 1) {
+        if (this.suggestion.selectedIndex < this.suggestion.matchedItems.length - 1) {
           this.suggestion.selectedIndex++;
         }
         this.suggestion.highlight();
@@ -71,7 +71,7 @@ class TextAreaSuggestion {
     });
 
     this.suggestion.on('click', e => {
-      this.textArea.insert(this.text, e.target.textContent);
+      this.textArea.insert(this.text, e.target.getAttribute('data-suggestion'));
       this.suggestion.hide();
     });
   }

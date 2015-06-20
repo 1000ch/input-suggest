@@ -11,8 +11,8 @@ export default class TextArea extends EventEmitter {
   constructor(textarea) {
     super();
 
-    this.textarea = textarea;
-    this.style    = getComputedStyle(textarea);
+    this.textarea       = textarea;
+    this.style          = getComputedStyle(textarea);
 
     this.selectionStart = 0;
     this.selectionEnd   = 0;
@@ -57,7 +57,7 @@ export default class TextArea extends EventEmitter {
     if (this.isDeleted) {
       this.input = '';
     } else {
-      this.input  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+      this.input = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
     }
 
     this.emit('input', this.input);
@@ -66,8 +66,8 @@ export default class TextArea extends EventEmitter {
   onKeyDown(e) {
     switch (e.keyCode) {
       case VK_DELETE:
-        this.emit('delete');
         this.isDeleted = true;
+        this.emit('delete', e);
         break;
       case VK_ENTER:
         this.emit('enter', e);
