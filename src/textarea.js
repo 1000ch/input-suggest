@@ -19,10 +19,13 @@ export default class Textarea extends EventEmitter {
     this.inputText      = '';
     this.lastInputText  = '';
     this.isDeleted      = false;
-    this.fontsize       = Number(this.style['font-size'].replace(/(px)/, ''));
 
     textarea.addEventListener('input', this.onInput.bind(this));
     textarea.addEventListener('keydown', this.onKeyDown.bind(this));
+  }
+
+  get fontSize() {
+    return Number(this.style['font-size'].replace(/(px)/, ''));
   }
 
   get position() {
@@ -36,7 +39,7 @@ export default class Textarea extends EventEmitter {
     let textarea = this.position;
     let caret    = getCaret(this.textarea, this.textarea.selectionEnd);
     return {
-      top: textarea.top + caret.top + this.fontsize,
+      top: textarea.top + caret.top + this.fontSize,
       left: textarea.left + caret.left
     };
   }
