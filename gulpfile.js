@@ -12,7 +12,7 @@ gulp.task('js', function () {
   var fileName   = 'textarea-suggestion';
 
   browserify({
-    standalone: 'TextareaSuggestion',
+    standalone: 'TextAreaSuggestion',
     entries: ['src/index.js'],
     extensions: ['.js']
   }).transform(babelify)

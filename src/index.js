@@ -1,44 +1,56 @@
 require('string.prototype.startswith');
 
-const Textarea   = require('./textarea');
+const TextArea   = require('./textarea');
 const Suggestion = require('./suggestion');
 
-class TextareaSuggestion {
+class TextAreaSuggestion {
 
   constructor(textarea, suggestions) {
 
     if (!textarea) {
-      throw new Error('Invalid element');
+      throw new Error('Invalid argument');
     }
 
     if (typeof textarea === 'string') {
       textarea = document.querySelector(textarea);
     }
 
-    this.textarea   = new Textarea(textarea);
+    this.textArea   = new TextArea(textarea);
     this.suggestion = new Suggestion(suggestions);
+    this.text       = '';
 
-    this.textarea.on('input', (inputText) => {
-      this.suggestion.setMatcher(inputText);
+    this.textArea.on('input', input => {
 
-      if (inputText.length !== 0 && this.suggestion.matched.length !== 0) {
+      if (this.suggestion.isShown) {
+        if (this.textArea.isDeleted && this.text.length !== 0) {
+          this.text = this.text.substring(0, this.text.length - 1);
+        } else {
+          this.text += input;
+        }
+      } else {
+        this.text = input;
+      }
+
+      this.suggestion.setMatcher(this.text);
+
+      if (this.text.length !== 0 && this.suggestion.matched.length !== 0) {
+        let position = this.textArea.popupPosition;
         this.suggestion.prepareItems();
-        let position = this.textarea.popupPosition;
         this.suggestion.show(position.top, position.left);
       } else {
         this.suggestion.hide();
       }
     });
 
-    this.textarea.on('enter', (e) => {
+    this.textArea.on('enter', e => {
       if (this.suggestion.isSelected) {
         e.preventDefault();
-        this.textarea.insert(this.suggestion.selected);
+        this.textArea.insert(this.text, this.suggestion.selected);
       }
       this.suggestion.hide();
     });
 
-    this.textarea.on('up', (e) => {
+    this.textArea.on('up', e => {
       if (this.suggestion.isShown) {
         e.preventDefault();
         if (this.suggestion.selectedIndex > 0) {
@@ -48,7 +60,7 @@ class TextareaSuggestion {
       }
     });
 
-    this.textarea.on('down', (e) => {
+    this.textArea.on('down', e => {
       if (this.suggestion.isShown) {
         e.preventDefault();
         if (this.suggestion.selectedIndex < this.suggestion.matched.length - 1) {
@@ -57,6 +69,11 @@ class TextareaSuggestion {
         this.suggestion.highlight();
       }
     });
+
+    this.suggestion.on('click', e => {
+      this.textArea.insert(this.text, e.target.textContent);
+      this.suggestion.hide();
+    });
   }
 
   setSuggestions(suggestions) {
@@ -64,4 +81,4 @@ class TextareaSuggestion {
   }
 }
 
-export default TextareaSuggestion;
+export default TextAreaSuggestion;

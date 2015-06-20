@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TextareaSuggestion = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TextAreaSuggestion = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -487,47 +487,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 require('string.prototype.startswith');
 
-var Textarea = require('./textarea');
+var TextArea = require('./textarea');
 var Suggestion = require('./suggestion');
 
-var TextareaSuggestion = (function () {
-  function TextareaSuggestion(textarea, suggestions) {
+var TextAreaSuggestion = (function () {
+  function TextAreaSuggestion(textarea, suggestions) {
     var _this = this;
 
-    _classCallCheck(this, TextareaSuggestion);
+    _classCallCheck(this, TextAreaSuggestion);
 
     if (!textarea) {
-      throw new Error('Invalid element');
+      throw new Error('Invalid argument');
     }
 
     if (typeof textarea === 'string') {
       textarea = document.querySelector(textarea);
     }
 
-    this.textarea = new Textarea(textarea);
+    this.textArea = new TextArea(textarea);
     this.suggestion = new Suggestion(suggestions);
+    this.text = '';
 
-    this.textarea.on('input', function (inputText) {
-      _this.suggestion.setMatcher(inputText);
+    this.textArea.on('input', function (input) {
 
-      if (inputText.length !== 0 && _this.suggestion.matched.length !== 0) {
+      if (_this.suggestion.isShown) {
+        if (_this.textArea.isDeleted && _this.text.length !== 0) {
+          _this.text = _this.text.substring(0, _this.text.length - 1);
+        } else {
+          _this.text += input;
+        }
+      } else {
+        _this.text = input;
+      }
+
+      _this.suggestion.setMatcher(_this.text);
+
+      if (_this.text.length !== 0 && _this.suggestion.matched.length !== 0) {
+        var position = _this.textArea.popupPosition;
         _this.suggestion.prepareItems();
-        var position = _this.textarea.popupPosition;
         _this.suggestion.show(position.top, position.left);
       } else {
         _this.suggestion.hide();
       }
     });
 
-    this.textarea.on('enter', function (e) {
+    this.textArea.on('enter', function (e) {
       if (_this.suggestion.isSelected) {
         e.preventDefault();
-        _this.textarea.insert(_this.suggestion.selected);
+        _this.textArea.insert(_this.text, _this.suggestion.selected);
       }
       _this.suggestion.hide();
     });
 
-    this.textarea.on('up', function (e) {
+    this.textArea.on('up', function (e) {
       if (_this.suggestion.isShown) {
         e.preventDefault();
         if (_this.suggestion.selectedIndex > 0) {
@@ -537,7 +549,7 @@ var TextareaSuggestion = (function () {
       }
     });
 
-    this.textarea.on('down', function (e) {
+    this.textArea.on('down', function (e) {
       if (_this.suggestion.isShown) {
         e.preventDefault();
         if (_this.suggestion.selectedIndex < _this.suggestion.matched.length - 1) {
@@ -546,19 +558,24 @@ var TextareaSuggestion = (function () {
         _this.suggestion.highlight();
       }
     });
+
+    this.suggestion.on('click', function (e) {
+      _this.textArea.insert(_this.text, e.target.textContent);
+      _this.suggestion.hide();
+    });
   }
 
-  _createClass(TextareaSuggestion, [{
+  _createClass(TextAreaSuggestion, [{
     key: 'setSuggestions',
     value: function setSuggestions(suggestions) {
       this.suggestion.setSuggestions(suggestions);
     }
   }]);
 
-  return TextareaSuggestion;
+  return TextAreaSuggestion;
 })();
 
-exports['default'] = TextareaSuggestion;
+exports['default'] = TextAreaSuggestion;
 module.exports = exports['default'];
 
 },{"./suggestion":5,"./textarea":6,"string.prototype.startswith":2}],5:[function(require,module,exports){
@@ -646,8 +663,8 @@ var Suggestion = (function (_EventEmitter) {
     }
   }, {
     key: 'setMatcher',
-    value: function setMatcher(match) {
-      this.match = match;
+    value: function setMatcher(matcher) {
+      this.matcher = matcher;
     }
   }, {
     key: 'setSuggestions',
@@ -692,7 +709,6 @@ var Suggestion = (function (_EventEmitter) {
       this.container.style.top = top + 'px';
       this.container.style.left = left + 'px';
       this.container.style.display = 'block';
-
       this.container.classList.add('is-shown');
     }
   }, {
@@ -700,7 +716,6 @@ var Suggestion = (function (_EventEmitter) {
     value: function hide() {
       this.container.style.display = 'none';
       this.selectedIndex = -1;
-
       this.container.classList.remove('is-shown');
       var _iteratorNormalCompletion3 = true;
       var _didIteratorError3 = false;
@@ -760,7 +775,7 @@ var Suggestion = (function (_EventEmitter) {
   }, {
     key: 'onClick',
     value: function onClick(e) {
-      this.emit('click', e.target.textContent);
+      this.emit('click', e);
     }
   }, {
     key: 'isSelected',
@@ -778,7 +793,7 @@ var Suggestion = (function (_EventEmitter) {
       var _this = this;
 
       return this.suggestions.filter(function (suggestion) {
-        return suggestion.startsWith(_this.matcher);
+        return suggestion.indexOf(_this.matcher) !== -1;
       });
     }
   }, {
@@ -817,34 +832,32 @@ var VK_ENTER = 13;
 var VK_UP = 38;
 var VK_DOWN = 40;
 
-var Textarea = (function (_EventEmitter) {
-  function Textarea(textarea) {
-    _classCallCheck(this, Textarea);
+var TextArea = (function (_EventEmitter) {
+  function TextArea(textarea) {
+    _classCallCheck(this, TextArea);
 
-    _get(Object.getPrototypeOf(Textarea.prototype), 'constructor', this).call(this);
+    _get(Object.getPrototypeOf(TextArea.prototype), 'constructor', this).call(this);
 
     this.textarea = textarea;
     this.style = getComputedStyle(textarea);
 
     this.selectionStart = 0;
     this.selectionEnd = 0;
-    this.inputText = '';
-    this.lastInputText = '';
+    this.input = '';
     this.isDeleted = false;
-    this.fontsize = Number(this.style['font-size'].replace(/(px)/, ''));
 
     textarea.addEventListener('input', this.onInput.bind(this));
     textarea.addEventListener('keydown', this.onKeyDown.bind(this));
   }
 
-  _inherits(Textarea, _EventEmitter);
+  _inherits(TextArea, _EventEmitter);
 
-  _createClass(Textarea, [{
+  _createClass(TextArea, [{
     key: 'insert',
-    value: function insert(text) {
-      this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
-      this.textarea.setRangeText(text);
+    value: function insert(match, text) {
       var caretIndex = this.selectionEnd + text.length;
+      this.textarea.setSelectionRange(this.selectionEnd - match.length, this.selectionEnd);
+      this.textarea.setRangeText(text);
       this.textarea.setSelectionRange(caretIndex, caretIndex);
     }
   }, {
@@ -854,22 +867,12 @@ var Textarea = (function (_EventEmitter) {
       this.selectionEnd = e.target.selectionEnd;
 
       if (this.isDeleted) {
-        this.lastInputText = '';
+        this.input = '';
       } else {
-        this.lastInputText = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+        this.input = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
       }
 
-      if (this.isShown) {
-        if (this.isDeleted && this.inputText.length !== 0) {
-          this.inputText = this.inputText.substring(0, this.inputText.length - 1);
-        } else {
-          this.inputText += this.lastInputText;
-        }
-      } else {
-        this.inputText = this.lastInputText;
-      }
-
-      this.emit('input', this.inputText);
+      this.emit('input', this.input);
     }
   }, {
     key: 'onKeyDown',
@@ -894,6 +897,11 @@ var Textarea = (function (_EventEmitter) {
       }
     }
   }, {
+    key: 'fontSize',
+    get: function () {
+      return Number(this.style['font-size'].replace(/(px)/, ''));
+    }
+  }, {
     key: 'position',
     get: function () {
       return {
@@ -907,16 +915,16 @@ var Textarea = (function (_EventEmitter) {
       var textarea = this.position;
       var caret = getCaret(this.textarea, this.textarea.selectionEnd);
       return {
-        top: textarea.top + caret.top + this.fontsize,
+        top: textarea.top + caret.top + this.fontSize,
         left: textarea.left + caret.left
       };
     }
   }]);
 
-  return Textarea;
+  return TextArea;
 })(EventEmitter);
 
-exports['default'] = Textarea;
+exports['default'] = TextArea;
 module.exports = exports['default'];
 
 },{"events":1,"textarea-caret-position/index.js":3}]},{},[4])(4)

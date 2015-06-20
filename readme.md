@@ -1,6 +1,6 @@
 # textarea-suggestion
 
-Show suggestions when input.
+Show suggestions when you input.
 
 ## Install
 
@@ -21,10 +21,21 @@ $ bower install textarea-suggestion
 ```html
 <textarea></textarea>
 <script>
-  var textarea   = document.querySelector('textarea');
-  var suggestion = new TextareaSuggestion(textarea);
-  suggestion.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
+  var tas = new TextAreaSuggestion('textarea');
+  tas.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
 </script>
+```
+
+## Customize popup
+
+You can style popup with following HTML structure.
+
+```html
+<ul class="suggestion is-shown">
+  <li class="suggestion__item is-selected">Item1 is selected</li>
+  <li class="suggestion__item">Item2</li>
+  <li class="suggestion__item">Item3</li>
+</ul>
 ```
 
 ## License

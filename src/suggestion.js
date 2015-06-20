@@ -74,17 +74,15 @@ export default class Suggestion extends EventEmitter {
   }
 
   show(top, left) {
-    this.container.style.top = top + 'px';
-    this.container.style.left = left + 'px';
+    this.container.style.top     = top + 'px';
+    this.container.style.left    = left + 'px';
     this.container.style.display = 'block';
-
     this.container.classList.add('is-shown');
   }
 
   hide() {
     this.container.style.display = 'none';
-    this.selectedIndex = -1;
-
+    this.selectedIndex           = -1;
     this.container.classList.remove('is-shown');
     for (let item of this.list) {
       item.classList.remove('is-selected');
@@ -99,6 +97,6 @@ export default class Suggestion extends EventEmitter {
   }
 
   onClick(e) {
-    this.emit('click', e.target.textContent);
+    this.emit('click', e);
   }
 }

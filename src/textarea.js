@@ -6,7 +6,7 @@ const VK_ENTER  = 13;
 const VK_UP     = 38;
 const VK_DOWN   = 40;
 
-export default class Textarea extends EventEmitter {
+export default class TextArea extends EventEmitter {
 
   constructor(textarea) {
     super();
@@ -16,8 +16,7 @@ export default class Textarea extends EventEmitter {
 
     this.selectionStart = 0;
     this.selectionEnd   = 0;
-    this.inputText      = '';
-    this.lastInputText  = '';
+    this.input          = '';
     this.isDeleted      = false;
 
     textarea.addEventListener('input', this.onInput.bind(this));
@@ -44,10 +43,10 @@ export default class Textarea extends EventEmitter {
     };
   }
 
-  insert(text) {
-    this.textarea.setSelectionRange(this.selectionEnd - this.inputText.length, this.selectionEnd);
-    this.textarea.setRangeText(text);
+  insert(match, text) {
     let caretIndex = this.selectionEnd + text.length;
+    this.textarea.setSelectionRange(this.selectionEnd - match.length, this.selectionEnd);
+    this.textarea.setRangeText(text);
     this.textarea.setSelectionRange(caretIndex, caretIndex);
   }
 
@@ -56,22 +55,12 @@ export default class Textarea extends EventEmitter {
     this.selectionEnd   = e.target.selectionEnd;
 
     if (this.isDeleted) {
-      this.lastInputText = '';
+      this.input = '';
     } else {
-      this.lastInputText  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
+      this.input  = this.textarea.value.substring(this.selectionEnd - 1, this.selectionEnd);
     }
 
-    if (this.isShown) {
-      if (this.isDeleted && this.inputText.length !== 0) {
-        this.inputText = this.inputText.substring(0, this.inputText.length - 1);
-      } else {
-        this.inputText += this.lastInputText;
-      }
-    } else {
-      this.inputText = this.lastInputText;
-    }
-
-    this.emit('input', this.inputText);
+    this.emit('input', this.input);
   }
 
   onKeyDown(e) {

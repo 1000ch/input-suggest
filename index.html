@@ -8,8 +8,8 @@
         font-family: 'Roboto Mono';
       }
       textarea {
-        width: 240px;
-        height: 240px;
+        width: 480px;
+        height: 480px;
         font-size: 24px;
         font-family: 'Roboto Mono';
       }
@@ -31,11 +31,10 @@
   </head>
   <body>
     <textarea></textarea>
-    <script src="dist/textarea-suggestion.min.js"></script>
+    <script src="dist/textarea-suggestion.js"></script>
     <script>
-      var textarea   = document.querySelector('textarea');
-      var suggestion = new TextareaSuggestion(textarea);
-      suggestion.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
+      var tas = new TextAreaSuggestion('textarea');
+      tas.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
     </script>
   </body>
 </html>
