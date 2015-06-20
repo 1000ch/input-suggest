@@ -8,10 +8,14 @@
         font-family: 'Roboto Mono';
       }
       textarea {
-        width: 480px;
+        width: 100%;
         height: 480px;
         font-size: 24px;
         font-family: 'Roboto Mono';
+      }
+      .container {
+        margin: 0 auto;
+        max-width: 960px;
       }
       .suggestion {
         border: 1px solid #ccc;
@@ -30,11 +34,16 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto Mono:400,700">
   </head>
   <body>
-    <textarea></textarea>
+    <div class="container">
+      <h1><a>textarea-suggestion</a></h1>
+      <p>Type Apple goods.</p>
+      <textarea></textarea>
+    </div>
+    <a href="https://github.com/1000ch/textarea-suggestion"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/567c3a48d796e2fc06ea80409cc9dd82bf714434/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png"></a>
     <script src="dist/textarea-suggestion.js"></script>
     <script>
       var tas = new TextAreaSuggestion('textarea');
-      tas.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
+      tas.setSuggestions(['AirMac Express ', 'Apple TV', 'Apple Watch', 'Mac Book Pro', 'Mac Book', 'iMac', 'iPad', 'iPad mini', 'iPhone', 'iPod', 'iPod Touch']);
     </script>
   </body>
 </html>
