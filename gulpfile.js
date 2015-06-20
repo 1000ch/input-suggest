@@ -9,10 +9,10 @@ gulp.task('js', function () {
   var buffer     = require('vinyl-buffer');
   var rename     = require("gulp-rename");
   var uglify     = require("gulp-uglify");
-  var fileName   = 'textarea-suggestion';
+  var fileName   = 'input-suggestion';
 
   browserify({
-    standalone: 'TextAreaSuggestion',
+    standalone: 'InputSuggestion',
     entries: ['src/index.js'],
     extensions: ['.js']
   }).transform(babelify)

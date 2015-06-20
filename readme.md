@@ -1,4 +1,4 @@
-# textarea-suggestion
+# input-suggestion
 
 Show suggestions when you input.
 
@@ -7,13 +7,13 @@ Show suggestions when you input.
 Using npm:
 
 ```sh
-$ npm install textarea-suggestion
+$ npm install input-suggestion
 ```
 
 Using bower:
 
 ```sh
-$ bower install textarea-suggestion
+$ bower install input-suggestion
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ $ bower install textarea-suggestion
 ```html
 <textarea></textarea>
 <script>
-  var tas = new TextAreaSuggestion('textarea');
+  var tas = new InputSuggestion('textarea');
   tas.setSuggestions(['Apple', 'Apple Watch', 'Mac', 'iPad', 'iPhone', 'iPod', 'iPod Touch']);
 </script>
 ```

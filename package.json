@@ -1,8 +1,8 @@
 {
-  "name": "textarea-suggestion",
+  "name": "input-suggestion",
   "version": "1.0.0",
-  "description": "Textarea Suggestion",
-  "main": "dist/textarea-suggestion.js",
+  "description": "Show suggestions when you input.",
+  "main": "dist/input-suggestion.js",
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",

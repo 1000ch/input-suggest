@@ -3,7 +3,7 @@ require("babel/polyfill");
 const TextArea   = require('./textarea');
 const Suggestion = require('./suggestion');
 
-class TextAreaSuggestion {
+class InputSuggestion {
 
   constructor(textarea, suggestions) {
 
@@ -82,7 +82,7 @@ class TextAreaSuggestion {
 }
 
 if (module !== undefined && module.exports !== undefined) {
-  module.exports = TextAreaSuggestion;
+  module.exports = InputSuggestion;
 } else {
-  window.TextAreaSuggestion = TextAreaSuggestion;
+  window.InputSuggestion = InputSuggestion;
 }

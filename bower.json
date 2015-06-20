@@ -1,9 +1,9 @@
 {
-  "name": "textarea-suggestion",
+  "name": "input-suggestion",
   "authors": [
     "1000ch <shogo.sensui@gmail.com>"
   ],
-  "description": "Textarea Suggestion",
+  "description": "Show suggestions when you input.",
   "license": "MIT",
   "ignore": [
     "**/.*",
