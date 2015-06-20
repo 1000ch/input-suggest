@@ -16,7 +16,6 @@ gulp.task('js', function () {
     entries: ['src/index.js'],
     extensions: ['.js']
   }).transform(babelify)
-    .transform(debowerify)
     .bundle()
     .pipe(source(fileName + '.js'))
     .pipe(buffer())

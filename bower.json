@@ -12,8 +12,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "dependencies": {
-    "textarea-caret-position": "component/textarea-caret-position#~3.0.0"
-  }
+  ]
 }
