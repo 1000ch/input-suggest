@@ -40,8 +40,8 @@ export default class Suggestion extends EventEmitter {
     }
   }
 
-  setMatcher(match) {
-    this.match = match;
+  setMatcher(matcher) {
+    this.matcher = matcher;
   }
 
   setSuggestions(suggestions = []) {
@@ -66,7 +66,7 @@ export default class Suggestion extends EventEmitter {
   }
 
   get matched() {
-    return this.suggestions.filter(suggestion => suggestion.startsWith(this.matcher));
+    return this.suggestions.filter(suggestion => suggestion.indexOf(this.matcher) !== -1);
   }
 
   get selected() {
