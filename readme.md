@@ -1,5 +1,6 @@
 # input-suggest
 
+[![](https://circleci.com/gh/:1000ch/input-suggest.svg?style=shield&circle-token=c2cd81d5e68b0c2429278a315f2c1249c0d09378)](https://circleci.com/gh/1000ch/input-suggest)
 [![NPM version](https://badge.fury.io/js/input-suggest.svg)](http://badge.fury.io/js/input-suggest)
 [![Dependency Status](https://david-dm.org/1000ch/input-suggest.svg)](https://david-dm.org/1000ch/input-suggest)
 [![devDependency Status](https://david-dm.org/1000ch/input-suggest/dev-status.svg)](https://david-dm.org/1000ch/input-suggest#info=devDependencies)
