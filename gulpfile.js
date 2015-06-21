@@ -3,16 +3,15 @@ var gulp = require('gulp');
 gulp.task('js', function () {
 
   var browserify = require("browserify");
-  var debowerify = require("debowerify");
   var babelify   = require("babelify");
   var source     = require('vinyl-source-stream');
   var buffer     = require('vinyl-buffer');
   var rename     = require("gulp-rename");
   var uglify     = require("gulp-uglify");
-  var fileName   = 'input-suggestion';
+  var fileName   = 'input-suggest';
 
   browserify({
-    standalone: 'InputSuggestion',
+    standalone: 'InputSuggest',
     entries: ['src/index.js'],
     extensions: ['.js']
   }).transform(babelify)

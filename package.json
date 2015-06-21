@@ -1,8 +1,8 @@
 {
-  "name": "input-suggestion",
+  "name": "input-suggest",
   "version": "1.0.0",
   "description": "Show suggestions when you input.",
-  "main": "dist/input-suggestion.js",
+  "main": "dist/input-suggest.js",
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",

@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.InputSuggestion = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.InputSuggest = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3114,7 +3114,10 @@ module.exports = require('./modules/$').core;
       var value = result.value;
       return value instanceof AwaitArgument
         ? Promise.resolve(value.arg).then(invokeNext, invokeThrow)
-        : result;
+        : Promise.resolve(value).then(function(unwrapped) {
+            result.value = unwrapped;
+            return result;
+          }, invokeThrow);
     }
 
     if (typeof process === "object" && process.domain) {
@@ -3149,7 +3152,7 @@ module.exports = require('./modules/$').core;
       // Avoid propagating enqueueResult failures to Promises returned by
       // later invocations of the iterator, and call generator.return() to
       // allow the generator a chance to clean up.
-      previousPromise = enqueueResult.catch(invokeReturn);
+      previousPromise = enqueueResult["catch"](invokeReturn);
 
       return enqueueResult;
     }
@@ -4137,11 +4140,11 @@ require('babel/polyfill');
 var TextArea = require('./textarea');
 var Suggestion = require('./suggestion');
 
-var InputSuggestion = (function () {
-  function InputSuggestion(textarea, suggestions) {
+var InputSuggest = (function () {
+  function InputSuggest(textarea, suggestions) {
     var _this = this;
 
-    _classCallCheck(this, InputSuggestion);
+    _classCallCheck(this, InputSuggest);
 
     if (!textarea) {
       throw new Error('Invalid argument');
@@ -4212,20 +4215,20 @@ var InputSuggestion = (function () {
     });
   }
 
-  _createClass(InputSuggestion, [{
+  _createClass(InputSuggest, [{
     key: 'setSuggestions',
     value: function setSuggestions(suggestions) {
       this.suggestion.setSuggestions(suggestions);
     }
   }]);
 
-  return InputSuggestion;
+  return InputSuggest;
 })();
 
 if (module !== undefined && module.exports !== undefined) {
-  module.exports = InputSuggestion;
+  module.exports = InputSuggest;
 } else {
-  window.InputSuggestion = InputSuggestion;
+  window.InputSuggest = InputSuggest;
 }
 
 },{"./suggestion":98,"./textarea":99,"babel/polyfill":93}],98:[function(require,module,exports){
@@ -4237,7 +4240,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -4430,17 +4433,17 @@ var Suggestion = (function (_EventEmitter) {
     }
   }, {
     key: 'isSelected',
-    get: function () {
+    get: function get() {
       return this.isShown && this.selectedIndex !== -1;
     }
   }, {
     key: 'isShown',
-    get: function () {
+    get: function get() {
       return this.container.classList.contains('is-shown');
     }
   }, {
     key: 'matchedItems',
-    get: function () {
+    get: function get() {
       var _this = this;
 
       return this.suggestions.filter(function (suggestion) {
@@ -4449,7 +4452,7 @@ var Suggestion = (function (_EventEmitter) {
     }
   }, {
     key: 'selectedItem',
-    get: function () {
+    get: function get() {
       return this.matchedItems[this.selectedIndex];
     }
   }]);
@@ -4469,7 +4472,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -4549,12 +4552,12 @@ var TextArea = (function (_EventEmitter) {
     }
   }, {
     key: 'fontSize',
-    get: function () {
+    get: function get() {
       return Number(this.style['font-size'].replace(/(px)/, ''));
     }
   }, {
     key: 'position',
-    get: function () {
+    get: function get() {
       return {
         top: this.textarea.offsetTop,
         left: this.textarea.offsetLeft
@@ -4562,7 +4565,7 @@ var TextArea = (function (_EventEmitter) {
     }
   }, {
     key: 'popupPosition',
-    get: function () {
+    get: function get() {
       var textarea = this.position;
       var caret = getCaret(this.textarea, this.textarea.selectionEnd);
       return {
