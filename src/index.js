@@ -2,6 +2,7 @@ require("babel/polyfill");
 
 const TextArea   = require('./textarea');
 const Suggestion = require('./suggestion');
+const Popup      = require('./popup');
 
 class InputSuggest {
 
@@ -17,11 +18,12 @@ class InputSuggest {
 
     this.textArea   = new TextArea(textarea);
     this.suggestion = new Suggestion(suggestions);
+    this.popup      = new Popup();
     this.text       = '';
 
     this.textArea.on('input', input => {
 
-      if (this.suggestion.isShown) {
+      if (this.popup.isShown) {
         if (this.textArea.isDeleted && this.text.length !== 0) {
           this.text = this.text.substring(0, this.text.length - 1);
         } else {
@@ -33,46 +35,46 @@ class InputSuggest {
 
       this.suggestion.setMatcher(this.text);
 
-      if (this.text.length !== 0 && this.suggestion.matchedItems.length !== 0) {
+      if (this.text.length !== 0 && this.suggestion.matched.length !== 0) {
         let position = this.textArea.popupPosition;
-        this.suggestion.prepareItems();
-        this.suggestion.show(position.top, position.left);
+        this.popup.render(this.suggestion.matched);
+        this.popup.show(position.top, position.left);
       } else {
-        this.suggestion.hide();
+        this.popup.hide();
       }
     });
 
     this.textArea.on('enter', e => {
-      if (this.suggestion.isSelected) {
+      if (this.popup.isSelected) {
         e.preventDefault();
-        this.textArea.insert(this.text, this.suggestion.selectedItem);
+        this.textArea.insert(this.text, this.popup.selectedItem.getAttribute('data-suggestion'));
       }
-      this.suggestion.hide();
+      this.popup.hide();
     });
 
     this.textArea.on('up', e => {
-      if (this.suggestion.isShown) {
+      if (this.popup.isShown) {
         e.preventDefault();
-        if (this.suggestion.selectedIndex > 0) {
-          this.suggestion.selectedIndex--;
+        if (this.popup.selectedIndex > 0) {
+          this.popup.selectedIndex--;
         }
-        this.suggestion.highlight();
+        this.popup.highlight();
       }
     });
 
     this.textArea.on('down', e => {
-      if (this.suggestion.isShown) {
+      if (this.popup.isShown) {
         e.preventDefault();
-        if (this.suggestion.selectedIndex < this.suggestion.matchedItems.length - 1) {
-          this.suggestion.selectedIndex++;
+        if (this.popup.selectedIndex < this.popup.items.length - 1) {
+          this.popup.selectedIndex++;
         }
-        this.suggestion.highlight();
+        this.popup.highlight();
       }
     });
 
-    this.suggestion.on('click', e => {
+    this.popup.on('click', e => {
       this.textArea.insert(this.text, e.target.getAttribute('data-suggestion'));
-      this.suggestion.hide();
+      this.popup.hide();
     });
   }
 
