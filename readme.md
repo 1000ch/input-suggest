@@ -1,5 +1,9 @@
 # input-suggest
 
+[![NPM version](https://badge.fury.io/js/input-suggest.svg)](http://badge.fury.io/js/input-suggest)
+[![Dependency Status](https://david-dm.org/1000ch/input-suggest.svg)](https://david-dm.org/1000ch/input-suggest)
+[![devDependency Status](https://david-dm.org/1000ch/input-suggest/dev-status.svg)](https://david-dm.org/1000ch/input-suggest#info=devDependencies)
+
 Show suggestions when you input.
 
 ## Install
