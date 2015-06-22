@@ -4,7 +4,6 @@ const patch         = require('virtual-dom/patch');
 const createElement = require('virtual-dom/create-element');
 
 const Delegate      = require('dom-delegate').Delegate;
-const observe       = require('object.observe');
 const EventEmitter  = require('events').EventEmitter;
 
 export default class Popup extends EventEmitter {
