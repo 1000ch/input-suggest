@@ -9,17 +9,17 @@ const EventEmitter   = require('events').EventEmitter;
 
 export default class Popup extends EventEmitter {
 
-  constructor(suggestions) {
+  constructor(suggestions = []) {
     super();
 
     this.suggestions   = [];
+    this.setSuggestions(suggestions);
+
     this.selectedIndex = -1;
     this.position = {
       top: 0,
       left: 0
     };
-
-    this.setSuggestions(suggestions);
 
     this.tree = this.createTree();
     this.root = createElement(this.tree);
@@ -42,27 +42,53 @@ export default class Popup extends EventEmitter {
   }
 
   setSuggestions(suggestions = []) {
-    this.suggestions = suggestions;
+
+    if (!Array.isArray(suggestions)) {
+      suggestions = [suggestions];
+    }
+
+    this.suggestions.length = 0;
+    for (let suggestion of suggestions) {
+      if (typeof suggestion === 'string') {
+        this.suggestions.push(suggestion);
+      }
+    }
   }
 
   createTree(style = {}, isShown = false) {
-    return h('ul', {
-      className: isShown ? 'suggestion is-shown': 'suggestion',
-      style: assign({
-        position: 'absolute',
-        top: `${this.position.top}px`,
-        left: `${this.position.left}px`,
-        display: 'none',
-        listStyle: 'none'
-      }, style)
-    }, this.suggestions.map((suggestion, index) => {
+
+    let items = this.suggestions.map((suggestion, index) => {
+
+      let className = 'suggestion__item';
+      if (index === this.selectedIndex) {
+        className += ' is-selected';
+      }
+
       return h('li', {
-        className: (index === this.selectedIndex) ? 'suggestion__item is-selected': 'suggestion__item',
+        className: className,
         dataset: {
           suggestion: suggestion
         }
       }, [suggestion]);
-    }));
+    });
+
+    style = assign({
+      position: 'absolute',
+      top: `${this.position.top}px`,
+      left: `${this.position.left}px`,
+      display: 'none',
+      listStyle: 'none'
+    }, style);
+
+    let className = 'suggestion';
+    if (isShown) {
+      className += ' is-shown'
+    }
+
+    return h('ul', {
+      className: className,
+      style: style
+    }, items);
   }
 
   renderTree(style, isShown) {
