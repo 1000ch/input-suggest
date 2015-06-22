@@ -3,20 +3,30 @@ const diff          = require('virtual-dom/diff');
 const patch         = require('virtual-dom/patch');
 const createElement = require('virtual-dom/create-element');
 
+const assign        = require('object-assign');
 const Delegate      = require('dom-delegate').Delegate;
 const EventEmitter  = require('events').EventEmitter;
 
 export default class Popup extends EventEmitter {
 
-  constructor() {
+  constructor(suggestions = []) {
     super();
 
-    this.container     = null;
-    this.delegate      = null;
-    this.items         = [];
+    this.suggestions = [];
+    this.setSuggestions(suggestions);
 
-    this.selectedIndex = -1
-    this.prepare();
+    this.selectedIndex = -1;
+    this.position = {
+      top: 0,
+      left: 0
+    };
+
+    this.tree = this.createTree();
+    this.root = createElement(this.tree);
+    this.delegate = new Delegate(this.root);
+    this.delegate.on('click', 'li', this.onClick.bind(this));
+
+    document.body.appendChild(this.root);
   }
 
   get isSelected() {
@@ -24,63 +34,79 @@ export default class Popup extends EventEmitter {
   }
 
   get isShown() {
-    return this.container.classList.contains('is-shown');
+    return this.root.classList.contains('is-shown');
   }
 
   get selectedItem() {
-    return this.items[this.selectedIndex];
+    return this.suggestions[this.selectedIndex];
   }
 
-  prepare() {
-    if (this.container == null) {
-      this.container = document.createElement('ul');
-      this.container.className = 'suggestion';
-      this.container.style.position = 'absolute';
-      this.container.style.display = 'none';
-      this.container.style.listStyle = 'none';
-      document.body.appendChild(this.container);
+  setSuggestions(suggestions = []) {
 
-      this.delegate = new Delegate(this.container);
-      this.delegate.on('click', 'li', this.onClick.bind(this));
+    if (!Array.isArray(suggestions)) {
+      suggestions = [suggestions];
     }
-  }
 
-  render(suggestions) {
-
-    this.items.length = 0;
-    this.container.innerHTML = '';
-
+    this.suggestions.length = 0;
     for (let suggestion of suggestions) {
-      let item = document.createElement('li');
-      item.className = 'suggestion__item';
-      item.textContent = suggestion;
-      item.setAttribute('data-suggestion', suggestion);
-      this.items.push(item);
-      this.container.appendChild(item);
+      if (typeof suggestion === 'string') {
+        this.suggestions.push(suggestion);
+      }
     }
   }
 
-  show(top, left) {
-    this.container.style.top     = top + 'px';
-    this.container.style.left    = left + 'px';
-    this.container.style.display = 'block';
-    this.container.classList.add('is-shown');
+  createTree(style = {}, isShown = false) {
+
+    let items = this.suggestions.map((suggestion, index) => {
+
+      let className = 'suggestion__item';
+      if (index === this.selectedIndex) {
+        className += ' is-selected';
+      }
+
+      return h('li', {
+        className: className,
+        dataset: {
+          suggestion: suggestion
+        }
+      }, [suggestion]);
+    });
+
+    style = assign({
+      position: 'absolute',
+      top: `${this.position.top}px`,
+      left: `${this.position.left}px`,
+      display: 'none',
+      listStyle: 'none'
+    }, style);
+
+    let className = 'suggestion';
+    if (isShown) {
+      className += ' is-shown'
+    }
+
+    return h('ul', {
+      className: className,
+      style: style
+    }, items);
+  }
+
+  renderTree(style, isShown) {
+    let tree    = this.createTree(style, isShown);
+    let patches = diff(this.tree, tree);
+    this.root   = patch(this.root, patches);
+    this.tree   = tree;
+  }
+
+  show() {
+    this.renderTree({
+      display: 'block'
+    }, true);
   }
 
   hide() {
-    this.container.style.display = 'none';
-    this.selectedIndex           = -1;
-    this.container.classList.remove('is-shown');
-    for (let item of this.items) {
-      item.classList.remove('is-selected');
-    }
-  }
-
-  highlight() {
-    for (let item of this.items) {
-      item.classList.remove('is-selected');
-    }
-    this.items[this.selectedIndex].classList.add('is-selected');
+    this.selectedIndex = -1;
+    this.renderTree({});
   }
 
   onClick(e) {

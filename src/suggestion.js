@@ -2,12 +2,11 @@ const EventEmitter = require('events').EventEmitter;
 
 export default class Suggestion extends EventEmitter {
 
-  constructor(suggestions) {
+  constructor(suggestions = []) {
     super();
 
-    this.suggestions   = [];
     this.matcher       = '';
-
+    this.suggestions   = [];
     this.setSuggestions(suggestions);
   }
 

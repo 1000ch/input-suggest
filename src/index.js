@@ -18,7 +18,7 @@ class InputSuggest {
 
     this.textArea   = new TextArea(textarea);
     this.suggestion = new Suggestion(suggestions);
-    this.popup      = new Popup();
+    this.popup      = new Popup(suggestions);
     this.text       = '';
 
     this.textArea.on('input', input => {
@@ -36,9 +36,9 @@ class InputSuggest {
       this.suggestion.setMatcher(this.text);
 
       if (this.text.length !== 0 && this.suggestion.matched.length !== 0) {
-        let position = this.textArea.popupPosition;
-        this.popup.render(this.suggestion.matched);
-        this.popup.show(position.top, position.left);
+        this.popup.position = this.textArea.popupPosition
+        this.popup.setSuggestions(this.suggestion.matched);
+        this.popup.show();
       } else {
         this.popup.hide();
       }
@@ -47,7 +47,7 @@ class InputSuggest {
     this.textArea.on('enter', e => {
       if (this.popup.isSelected) {
         e.preventDefault();
-        this.textArea.insert(this.text, this.popup.selectedItem.getAttribute('data-suggestion'));
+        this.textArea.insert(this.text, this.popup.selectedItem);
       }
       this.popup.hide();
     });
@@ -58,17 +58,17 @@ class InputSuggest {
         if (this.popup.selectedIndex > 0) {
           this.popup.selectedIndex--;
         }
-        this.popup.highlight();
+        this.popup.show();
       }
     });
 
     this.textArea.on('down', e => {
       if (this.popup.isShown) {
         e.preventDefault();
-        if (this.popup.selectedIndex < this.popup.items.length - 1) {
+        if (this.popup.selectedIndex < this.popup.suggestions.length - 1) {
           this.popup.selectedIndex++;
         }
-        this.popup.highlight();
+        this.popup.show();
       }
     });
 
