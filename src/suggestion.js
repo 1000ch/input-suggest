@@ -5,10 +5,13 @@ export default class Suggestion extends EventEmitter {
   constructor(suggestions = []) {
     super();
 
+    this.matcher       = '';
     this.suggestions   = [];
     this.setSuggestions(suggestions);
+  }
 
-    this.matcher       = '';
+  setMatcher(matcher) {
+    this.matcher = matcher;
   }
 
   setSuggestions(suggestions = []) {
@@ -23,10 +26,6 @@ export default class Suggestion extends EventEmitter {
         this.suggestions.push(suggestion);
       }
     }
-  }
-
-  setMatcher(matcher) {
-    this.matcher = matcher;
   }
 
   get matched() {

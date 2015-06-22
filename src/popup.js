@@ -1,18 +1,18 @@
-const h              = require('virtual-dom/h');
-const diff           = require('virtual-dom/diff');
-const patch          = require('virtual-dom/patch');
-const createElement  = require('virtual-dom/create-element');
+const h             = require('virtual-dom/h');
+const diff          = require('virtual-dom/diff');
+const patch         = require('virtual-dom/patch');
+const createElement = require('virtual-dom/create-element');
 
-const assign         = require('object-assign');
-const Delegate       = require('dom-delegate').Delegate;
-const EventEmitter   = require('events').EventEmitter;
+const assign        = require('object-assign');
+const Delegate      = require('dom-delegate').Delegate;
+const EventEmitter  = require('events').EventEmitter;
 
 export default class Popup extends EventEmitter {
 
   constructor(suggestions = []) {
     super();
 
-    this.suggestions   = [];
+    this.suggestions = [];
     this.setSuggestions(suggestions);
 
     this.selectedIndex = -1;
