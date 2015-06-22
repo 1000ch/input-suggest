@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter;
-const getCaret     = require('textarea-caret-position/index.js');
+const getCaret     = require('textarea-caret-position');
 
 const VK_DELETE = 8;
 const VK_ENTER  = 13;
