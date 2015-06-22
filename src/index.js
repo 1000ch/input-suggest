@@ -73,7 +73,7 @@ class InputSuggest {
     });
 
     this.popup.on('click', e => {
-      this.textArea.insert(this.text, e.target.getAttribute('data-suggestion'));
+      this.textArea.insert(this.text, e.target.dataset.suggestion);
       this.popup.hide();
     });
   }
