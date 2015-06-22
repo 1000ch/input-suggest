@@ -55,7 +55,7 @@ export default class Popup extends EventEmitter {
     }
   }
 
-  createTree(style = {}, isShown = false) {
+  createTree(style = {}, shown = false) {
 
     let items = this.suggestions.map((suggestion, index) => {
 
@@ -81,7 +81,7 @@ export default class Popup extends EventEmitter {
     }, style);
 
     let className = 'suggestion';
-    if (isShown) {
+    if (shown) {
       className += ' is-shown'
     }
 
@@ -91,8 +91,8 @@ export default class Popup extends EventEmitter {
     }, items);
   }
 
-  renderTree(style, isShown) {
-    let tree    = this.createTree(style, isShown);
+  renderTree(style, shown) {
+    let tree    = this.createTree(style, shown);
     let patches = diff(this.tree, tree);
     this.root   = patch(this.root, patches);
     this.tree   = tree;
@@ -106,7 +106,7 @@ export default class Popup extends EventEmitter {
 
   hide() {
     this.selectedIndex = -1;
-    this.renderTree({});
+    this.renderTree({}, false);
   }
 
   onClick(e) {
