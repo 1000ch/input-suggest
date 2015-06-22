@@ -35,24 +35,26 @@ describe('InputSuggest', function() {
   });
 
   it('return matched suggestions', function() {
-    let inputSuggest = new InputSuggest(document.createElement('input'), ['foo', 'bar', 'baz']);
-    inputSuggest.suggestion.setMatcher('a');
-    assert.ok(inputSuggest.suggestion.matched.length === 2);
-    inputSuggest.suggestion.setMatcher('f');
-    assert.ok(inputSuggest.suggestion.matched.length === 1);
-    inputSuggest.suggestion.setMatcher('ba');
-    assert.ok(inputSuggest.suggestion.matched.length === 2);
-    inputSuggest.suggestion.setMatcher('baz');
-    assert.ok(inputSuggest.suggestion.matched.length === 1);
+    let input = document.createElement('input');
+    let suggest = new InputSuggest(input, ['foo', 'bAr', 'BaZ']);
+    suggest.suggestion.setMatcher('a');
+    assert.ok(suggest.suggestion.matched.length === 2);
+    suggest.suggestion.setMatcher('f');
+    assert.ok(suggest.suggestion.matched.length === 1);
+    suggest.suggestion.setMatcher('ba');
+    assert.ok(suggest.suggestion.matched.length === 2);
+    suggest.suggestion.setMatcher('baz');
+    assert.ok(suggest.suggestion.matched.length === 1);
   });
 
   it('return selected suggestion', function() {
-    let inputSuggest = new InputSuggest(document.createElement('input'), ['foo', 'bar', 'baz']);
-    inputSuggest.popup.selectedIndex = 0;
-    assert.ok(inputSuggest.popup.selectedItem === 'foo');
-    inputSuggest.popup.selectedIndex = 1;
-    assert.ok(inputSuggest.popup.selectedItem === 'bar');
-    inputSuggest.popup.selectedIndex = 2;
-    assert.ok(inputSuggest.popup.selectedItem === 'baz');
+    let input = document.createElement('input');
+    let suggest = new InputSuggest(input, ['foo', 'bar', 'baz']);
+    suggest.popup.selectedIndex = 0;
+    assert.ok(suggest.popup.selectedItem === 'foo');
+    suggest.popup.selectedIndex = 1;
+    assert.ok(suggest.popup.selectedItem === 'bar');
+    suggest.popup.selectedIndex = 2;
+    assert.ok(suggest.popup.selectedItem === 'baz');
   });
 });

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "gulp test && karma start --singleRun",
     "build": "gulp build",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "tdd": "karma start"
   },
   "repository": {
     "type": "git",

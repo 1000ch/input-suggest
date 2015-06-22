@@ -27,19 +27,13 @@ export default class TextArea extends EventEmitter {
     return Number(this.style['font-size'].replace(/(px)/, ''));
   }
 
-  get position() {
-    return {
-      top: this.textarea.offsetTop,
-      left: this.textarea.offsetLeft
-    }
-  }
-
   get popupPosition() {
-    let textarea = this.position;
-    let caret    = getCaret(this.textarea, this.textarea.selectionEnd);
+    let top   = this.textarea.offsetTop;
+    let left  = this.textarea.offsetLeft;
+    let caret = getCaret(this.textarea, this.textarea.selectionEnd);
     return {
-      top: textarea.top + caret.top + this.fontSize,
-      left: textarea.left + caret.left
+      top: top + caret.top + this.fontSize,
+      left: left + caret.left
     };
   }
 
