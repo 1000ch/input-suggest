@@ -48,12 +48,11 @@ describe('InputSuggest', function() {
 
   it('return selected suggestion', function() {
     let inputSuggest = new InputSuggest(document.createElement('input'), ['foo', 'bar', 'baz']);
-    inputSuggest.popup.render(inputSuggest.suggestion.matched);
     inputSuggest.popup.selectedIndex = 0;
-    assert.ok(inputSuggest.popup.selectedItem.getAttribute('data-suggestion') === 'foo');
+    assert.ok(inputSuggest.popup.selectedItem === 'foo');
     inputSuggest.popup.selectedIndex = 1;
-    assert.ok(inputSuggest.popup.selectedItem.getAttribute('data-suggestion') === 'bar');
+    assert.ok(inputSuggest.popup.selectedItem === 'bar');
     inputSuggest.popup.selectedIndex = 2;
-    assert.ok(inputSuggest.popup.selectedItem.getAttribute('data-suggestion') === 'baz');
+    assert.ok(inputSuggest.popup.selectedItem === 'baz');
   });
 });

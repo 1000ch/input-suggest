@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "dom-delegate": "^2.0.3",
+    "object-assign": "^3.0.0",
     "textarea-caret-position": "git+https://github.com/component/textarea-caret-position.git",
     "virtual-dom": "^2.0.1"
   }
