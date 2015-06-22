@@ -5,13 +5,13 @@ export default class Suggestion extends EventEmitter {
   constructor(suggestions = []) {
     super();
 
-    this.matcher       = '';
-    this.suggestions   = [];
+    this.matcher     = '';
+    this.suggestions = [];
     this.setSuggestions(suggestions);
   }
 
   setMatcher(matcher) {
-    this.matcher = matcher;
+    this.matcher = matcher.toLowerCase();
   }
 
   setSuggestions(suggestions = []) {
@@ -29,6 +29,6 @@ export default class Suggestion extends EventEmitter {
   }
 
   get matched() {
-    return this.suggestions.filter(suggestion => suggestion.indexOf(this.matcher) !== -1);
+    return this.suggestions.filter(suggestion => suggestion.toLowerCase().indexOf(this.matcher) !== -1);
   }
 }
