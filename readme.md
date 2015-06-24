@@ -7,6 +7,8 @@
 
 Show suggestions when you input.
 
+![](demo.gif)
+
 ## Install
 
 Using npm:
