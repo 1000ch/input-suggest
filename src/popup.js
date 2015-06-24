@@ -59,13 +59,10 @@ export default class Popup extends EventEmitter {
 
     let items = this.suggestions.map((suggestion, index) => {
 
-      let className = 'suggestion__item';
-      if (index === this.selectedIndex) {
-        className += ' is-selected';
-      }
+      let isSelected = index === this.selectedIndex ? 'is-selected': '';
 
       return h('li', {
-        className: className,
+        className: `suggestion__item ${isSelected}`,
         dataset: {
           suggestion: suggestion
         }
@@ -80,13 +77,10 @@ export default class Popup extends EventEmitter {
       listStyle: 'none'
     }, style);
 
-    let className = 'suggestion';
-    if (shown) {
-      className += ' is-shown'
-    }
+    let isShown = shown ? 'is-shown': '';
 
     return h('ul', {
-      className: className,
+      className: `suggestion ${isShown}`,
       style: style
     }, items);
   }
