@@ -1,6 +1,6 @@
 {
   "name": "input-suggest",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Show suggestions when you input.",
   "main": "dist/input-suggest.js",
   "scripts": {
